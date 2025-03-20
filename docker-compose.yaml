@@ -1,0 +1,35 @@
+version: '3.8'
+
+services:
+  redis:
+    image: redis:alpine
+    ports: ["6379:6379"]
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+
+  chromadb:
+    image: chromadb/chroma
+    ports: ["8001:8000"]
+    volumes:
+      - chroma_data:/data
+
+#  backend:
+#    build: ./backend
+#    ports: ["8000:8000"]
+#    env_file: .env
+#    depends_on:
+#      redis:
+#        condition: service_healthy
+#      chromadb:
+#        condition: service_started
+#    volumes:
+#      - ./backend/src:/app/src
+#      - ./models:/app/models
+#      - ./backend/cache:/app/cache
+
+volumes:
+  redis_data:
+  chroma_data:
