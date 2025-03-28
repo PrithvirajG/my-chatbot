@@ -39,8 +39,7 @@ This repository contains the backend for a multimodal chatbot capable of handlin
    ```
 6. Visit the `http://localhost:8000/docs` to explore the API endpoints
 
-[Screencast from 28-03-25 12_15_36 PM IST.mp4](docs/Screencast%20from%2028-03-25%2012_15_36%20PM%20IST.mp4)
-
+![Screencast from 28-03-25 12_15_36 PM IST.gif](docs/Screencast%20from%2028-03-25%2012_15_36%20PM%20IST.gif)
 
 ## Future Improvements
 1. GPU Support: Enable CUDA for faster inference on NVIDIA GPUs.
