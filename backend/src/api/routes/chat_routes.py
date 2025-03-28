@@ -2,6 +2,7 @@ import time
 
 from fastapi import APIRouter, Depends, HTTPException
 from ...api.schemas import ChatRequest, ChatResponse
+from ...data.chroma_manager import add_to_chroma, get_retriever
 from ...data.redis_manager import redis_client
 from ...data.session_manager import SessionManager
 from ...core.model_router import model_router
@@ -26,22 +27,34 @@ async def handle_text_chat(request: ChatRequest):
             raise ValueError("Session not found")
         logger.debug(f"The ongoing sessions content: {session}")
 
-        chat_history = [(entry["user"], entry["ai"]) for entry in session["history"]]
+        # chat_history = [(entry["user"], entry["ai"]) for entry in session["history"]]
+        retriever = get_retriever(request.session_id)  # Assuming this function exists
+        logger.debug(f"Retrieved object received: {retriever}")
+
         # Select LLM for text
         llm = model_router.get_model("text")
 
         # Create conversational chain
-        chain = create_chain(llm, request.session_id)
+        chain = create_chain(llm, request.session_id, retriever)
+
         logger.debug(f"Chain created for session id {request.session_id}")
+        logger.debug(f"Relevant documents: {retriever.invoke(request.message)}")
 
         # Invoke chain with message and history
         _time = time.time()
         response = chain.invoke({
             "question": request.message,
-            "chat_history": chat_history
+            "chat_history": []
         })
+
+
         answer = response.get('answer', "Error in Giving a Response !")
+
         logger.debug(f"Invoke chain response received in time {time.time() - _time} | Answer: {answer}")
+        add_to_chroma(
+            documents=[f"User Query: {request.message} \nAI Response: {answer}"],
+            metadatas=[{"chat_id": request.session_id, "timestamp": time.time()}]
+        )
 
         # Update chat history in Redis
         session_manager.add_chat_history(request.session_id, request.message, answer)

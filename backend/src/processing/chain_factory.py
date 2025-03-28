@@ -9,19 +9,16 @@ from loguru import logger
 from backend.src.utils.profiling_tools import measure_time
 
 
-def create_chain(llm, chat_id: str):
+def create_chain(llm, chat_id: str, retriever):
     """Create a conversational retrieval chain."""
     try:
         _time = time.time()
-        retriever = get_retriever(chat_id)  # Assuming this function exists
         prompt_template = PromptTemplate(
-            input_variables=["context", "chat_history", "question"],
+            input_variables=["context", "question"],
             template="""
-            You are a helpful assistant. Use the following context and chat history to answer the question.
+            You are a helpful assistant. Use the following context to answer the question in markdown format.
     
             Context: {context}
-            
-            Chat History: {chat_history}
             
             Question: {question}
             
